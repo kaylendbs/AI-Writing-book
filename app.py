@@ -12,8 +12,6 @@ client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 if "result" not in st.session_state:
     st.session_state.result = ""
-if "submitted" not in st.session_state:
-    st.session_state.submitted = False
 
 st.markdown("""
 <style>
@@ -27,44 +25,47 @@ html, body, .stApp {
     overflow: hidden;
 }
 
-/* ===== 스트림릿 기본 요소 제거 ===== */
+/* ===== 스트림릿 기본 요소 숨기기 ===== */
 header, footer {
     visibility: hidden !important;
     height: 0 !important;
 }
 
+#MainMenu,
 [data-testid="stHeader"],
 [data-testid="stToolbar"],
 [data-testid="stDecoration"],
-[data-testid="stStatusWidget"],
-#MainMenu {
+[data-testid="stStatusWidget"] {
     display: none !important;
 }
 
 section.main,
 section.main > div,
 .block-container,
-[data-testid="stAppViewContainer"],
-[data-testid="stAppViewBlockContainer"] {
-    padding-top: 0rem !important;
-    margin-top: 0rem !important;
+[data-testid="stAppViewContainer"] {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
 }
 
 .block-container {
     max-width: 100vw !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    padding-bottom: 0 !important;
+    padding: 0 !important;
+}
+
+/* streamlit 기본 wrapper들 최소화 */
+div[data-testid="stVerticalBlock"] {
+    gap: 0 !important;
 }
 
 /* ===== 전체 레이아웃 ===== */
 .app-shell {
-    height: 100vh;
     width: 100vw;
+    height: 100vh;
     display: flex;
     background:
         radial-gradient(circle at 70% 40%, rgba(31, 63, 130, 0.18) 0%, rgba(4, 8, 20, 0) 28%),
         linear-gradient(180deg, #030712 0%, #020611 100%);
+    overflow: hidden;
 }
 
 /* ===== 왼쪽 패널 ===== */
@@ -74,7 +75,7 @@ section.main > div,
     height: 100vh;
     background: linear-gradient(180deg, rgba(45,46,58,0.96) 0%, rgba(36,38,49,0.97) 100%);
     border-right: 1px solid rgba(255,255,255,0.06);
-    padding: 30px 28px 28px 28px;
+    padding: 28px 28px 28px 28px;
     box-sizing: border-box;
     position: relative;
 }
@@ -83,27 +84,28 @@ section.main > div,
     position: absolute;
     top: 16px;
     right: 18px;
-    color: rgba(255,255,255,0.9);
-    font-size: 20px;
-    font-weight: 500;
+    color: rgba(255,255,255,0.88);
+    font-size: 24px;
+    line-height: 1;
+    font-weight: 400;
 }
 
 .left-title {
     color: #ffffff;
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 800;
     line-height: 1.45;
-    margin-top: 66px;
+    margin-top: 72px;
     margin-bottom: 34px;
     word-break: keep-all;
 }
 
 .left-dot {
     color: #ffffff;
-    font-size: 16px;
+    font-size: 17px;
     line-height: 1.8;
-    margin-bottom: 18px;
-    font-weight: 600;
+    margin-bottom: 22px;
+    font-weight: 700;
 }
 
 .left-list {
@@ -113,10 +115,10 @@ section.main > div,
 
 .left-list li {
     color: #ffffff;
-    font-size: 17px;
-    line-height: 1.8;
-    margin-bottom: 6px;
-    font-weight: 600;
+    font-size: 18px;
+    line-height: 1.7;
+    margin-bottom: 10px;
+    font-weight: 700;
     word-break: keep-all;
 }
 
@@ -133,11 +135,12 @@ section.main > div,
 
 .menu-dots {
     position: absolute;
-    top: 18px;
-    right: 24px;
-    color: rgba(255,255,255,0.9);
-    font-size: 26px;
-    letter-spacing: 2px;
+    top: 14px;
+    right: 20px;
+    color: rgba(255,255,255,0.88);
+    font-size: 28px;
+    letter-spacing: 1px;
+    z-index: 5;
 }
 
 .main-center {
@@ -146,12 +149,11 @@ section.main > div,
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px 32px 110px 32px;
+    padding: 40px 32px 140px 32px;
     box-sizing: border-box;
     text-align: center;
 }
 
-/* 아이콘 느낌 */
 .hero-icon-wrap {
     width: 250px;
     height: 250px;
@@ -169,7 +171,7 @@ section.main > div,
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.88;
+    opacity: 0.92;
 }
 
 .hero-icon {
@@ -183,34 +185,37 @@ section.main > div,
     font-weight: 900;
     letter-spacing: -0.03em;
     line-height: 1.18;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
     word-break: keep-all;
 }
 
 .hero-author {
     color: #c1c9da;
     font-size: 16px;
-    margin-bottom: 92px;
 }
 
 .hero-author span {
-    color: #f8f8fb;
+    color: #ffffff;
     font-weight: 700;
 }
 
-/* ===== 입력창 영역 ===== */
-.input-wrap {
-    width: 100%;
-    max-width: 820px;
-    margin: 0 auto;
+/* ===== 입력창 ===== */
+.input-fixed {
+    position: fixed;
+    left: calc(390px + ((100vw - 390px) / 2));
+    transform: translateX(-50%);
+    bottom: 28px;
+    width: min(820px, calc(100vw - 470px));
+    z-index: 30;
 }
 
-.input-label {
-    display: none;
+.input-shell {
+    position: relative;
+    width: 100%;
 }
 
 div[data-testid="stTextInput"] {
-    margin-bottom: 0 !important;
+    margin: 0 !important;
 }
 
 div[data-testid="stTextInput"] > div {
@@ -226,7 +231,7 @@ div[data-testid="stTextInput"] input {
     color: #ffffff !important;
     font-size: 18px !important;
     padding-left: 18px !important;
-    padding-right: 70px !important;
+    padding-right: 74px !important;
     box-shadow: none !important;
 }
 
@@ -235,26 +240,25 @@ div[data-testid="stTextInput"] input::placeholder {
     opacity: 1 !important;
 }
 
-/* 버튼을 입력창 위에 겹치기 */
-.send-button-wrap {
+.send-button {
     position: absolute;
-    right: 12px;
-    bottom: 12px;
-    width: 48px;
+    right: 10px;
+    top: 12px;
+    width: 46px;
     height: 40px;
-    z-index: 20;
+    z-index: 50;
 }
 
 .stButton > button {
-    width: 48px !important;
-    min-width: 48px !important;
+    width: 46px !important;
+    min-width: 46px !important;
     height: 40px !important;
     min-height: 40px !important;
     border-radius: 10px !important;
     border: none !important;
     background: rgba(255,255,255,0.08) !important;
     color: #d6dae5 !important;
-    font-size: 22px !important;
+    font-size: 20px !important;
     font-weight: 800 !important;
     padding: 0 !important;
     box-shadow: none !important;
@@ -265,12 +269,12 @@ div[data-testid="stTextInput"] input::placeholder {
     color: #ffffff !important;
 }
 
-/* ===== 결과 영역 ===== */
+/* ===== 결과창 ===== */
 .result-shell {
     position: fixed;
-    left: 430px;
-    right: 32px;
-    bottom: 26px;
+    left: 422px;
+    right: 28px;
+    bottom: 110px;
     max-height: 42vh;
     overflow: auto;
     background: rgba(12, 17, 30, 0.90);
@@ -279,6 +283,7 @@ div[data-testid="stTextInput"] input::placeholder {
     padding: 22px 24px;
     box-sizing: border-box;
     backdrop-filter: blur(10px);
+    z-index: 25;
 }
 
 .result-title {
@@ -293,6 +298,11 @@ div[data-testid="stTextInput"] input::placeholder {
     font-size: 15px;
     line-height: 1.85;
     white-space: pre-wrap;
+    word-break: keep-all;
+}
+
+.download-wrap {
+    margin-top: 16px;
 }
 
 div[data-testid="stDownloadButton"] > button {
@@ -304,7 +314,6 @@ div[data-testid="stDownloadButton"] > button {
     background: rgba(255,255,255,0.05) !important;
     color: white !important;
     font-weight: 700 !important;
-    margin-top: 16px !important;
 }
 
 /* ===== 모바일 대응 ===== */
@@ -313,10 +322,15 @@ div[data-testid="stDownloadButton"] > button {
         display: none;
     }
 
+    .input-fixed {
+        left: 50%;
+        width: calc(100vw - 40px);
+    }
+
     .result-shell {
         left: 20px;
         right: 20px;
-        bottom: 20px;
+        bottom: 100px;
     }
 
     .hero-title {
@@ -335,7 +349,7 @@ div[data-testid="stDownloadButton"] > button {
     .main-center {
         padding-left: 20px;
         padding-right: 20px;
-        padding-bottom: 100px;
+        padding-bottom: 130px;
     }
 }
 </style>
@@ -348,7 +362,7 @@ st.markdown("""
         <div class="left-title">
             하루에 책 한권을 쓰는 챗쓰기의 신 등장, 그 이름은 바로 AI 책쓰기의 신!
         </div>
-        <div class="left-dot">•&nbsp;&nbsp;사용 예시 :</div>
+        <div class="left-dot">• 사용 예시 :</div>
         <ol class="left-list">
             <li>"효율적으로 글을 쓰는 방법은?"</li>
             <li>"책으로 독자들에게 감동을 주는 방법은?"</li>
@@ -369,44 +383,27 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 입력창을 화면 하단 중앙에 띄우기 위한 고정 영역
-st.markdown("""
-<div style="
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 28px;
-    width: min(820px, calc(100vw - 80px));
-    z-index: 30;
-">
-""", unsafe_allow_html=True)
+st.markdown('<div class="input-fixed"><div class="input-shell">', unsafe_allow_html=True)
 
-user_topic = st.text_input(
+topic = st.text_input(
     "메시지 입력",
     placeholder="Your message",
     label_visibility="collapsed"
 )
 
-st.markdown("""
-<div class="send-button-wrap">
-""", unsafe_allow_html=True)
-
+st.markdown('<div class="send-button">', unsafe_allow_html=True)
 generate = st.button("➤")
-
-st.markdown("""
-</div>
-</div>
-""", unsafe_allow_html=True)
+st.markdown('</div></div></div>', unsafe_allow_html=True)
 
 if generate:
-    if not user_topic.strip():
+    if not topic.strip():
         st.warning("주제를 입력해줘.")
     else:
         prompt = f"""
 너는 전자책 전문 작가이자 책쓰기 코치다.
 
 사용자가 입력한 주제:
-{user_topic}
+{topic}
 
 아래 형식으로 한국어 전자책 초안을 길고 풍부하게 작성해라.
 
@@ -424,7 +421,7 @@ if generate:
 - 마지막에 실행 체크리스트 10개
 - 전체적으로 실제 전자책 원고처럼 자연스럽고 풍부하게 작성
 
-출력은 마크다운 느낌 없이 일반 텍스트처럼 읽기 좋게 작성해라.
+출력은 마크다운 느낌보다 실제 원고처럼 읽기 좋게 정리해라.
 """
         try:
             with st.spinner("전자책 초안 작성 중..."):
@@ -433,16 +430,22 @@ if generate:
                     input=prompt
                 )
                 st.session_state.result = response.output_text
-                st.session_state.submitted = True
         except Exception as e:
             st.session_state.result = f"오류가 발생했어.\n\n{str(e)}"
-            st.session_state.submitted = True
 
 if st.session_state.result:
+    safe_result = (
+        st.session_state.result
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
+
     st.markdown(f"""
     <div class="result-shell">
         <div class="result-title">생성된 초안</div>
-        <div class="result-box">{st.session_state.result.replace("<","&lt;").replace(">","&gt;")}</div>
+        <div class="result-box">{safe_result}</div>
+        <div class="download-wrap"></div>
     </div>
     """, unsafe_allow_html=True)
 
