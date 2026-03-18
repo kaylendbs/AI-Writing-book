@@ -59,7 +59,6 @@ def clean_text_for_pdf(text: str) -> str:
     for old, new in replacements.items():
         text = text.replace(old, new)
 
-    text = re.sub(r"[^\x00-\xFF가-힣ㄱ-ㅎㅏ-ㅣ\n\r\t ]", "", text)
     return text
 
 
@@ -68,16 +67,30 @@ def make_pdf(text: str) -> str:
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
 
-    font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
+    # Streamlit Cloud에서 자주 되는 한글 폰트 경로들
+    possible_fonts = [
+        "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
+        "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+        "/usr/share/fonts/truetype/noto/NotoSansCJKkr-Regular.otf",
+    ]
 
-    if os.path.exists(font_path):
-        pdf.add_font("Nanum", "", font_path)
-        pdf.set_font("Nanum", size=12)
+    font_path = None
+    for path in possible_fonts:
+        if os.path.exists(path):
+            font_path = path
+            break
+
+    if font_path:
+        pdf.add_font("KoreanFont", "", font_path, uni=True)
+        pdf.set_font("KoreanFont", size=12)
+        safe_text = text
     else:
-        pdf.set_font("Arial", size=12)
-        text = clean_text_for_pdf(text)
+        # 한글 폰트가 없으면 PDF에서 한글이 깨지므로 최소 안전처리
+        pdf.set_font("Helvetica", size=12)
+        safe_text = clean_text_for_pdf(text)
+        safe_text = re.sub(r"[가-힣ㄱ-ㅎㅏ-ㅣ]", "?", safe_text)
 
-    for paragraph in text.split("\n"):
+    for paragraph in safe_text.split("\n"):
         if not paragraph.strip():
             pdf.ln(4)
             continue
@@ -145,14 +158,18 @@ if st.button("전자책 생성"):
                     mime="text/plain"
                 )
 
-                pdf_path = make_pdf(result)
-                with open(pdf_path, "rb") as f:
-                    st.download_button(
-                        "📘 PDF 다운로드",
-                        f,
-                        file_name="ebook.pdf",
-                        mime="application/pdf"
-                    )
+                try:
+                    pdf_path = make_pdf(result)
+                    with open(pdf_path, "rb") as f:
+                        st.download_button(
+                            "📘 PDF 다운로드",
+                            f,
+                            file_name="ebook.pdf",
+                            mime="application/pdf"
+                        )
+                except Exception as pdf_error:
+                    st.warning("PDF 생성에서만 오류가 났어요. 텍스트 다운로드는 정상 사용 가능해요.")
+                    st.error(str(pdf_error))
 
             except Exception as e:
                 st.error("생성 중 오류가 발생했습니다.")
