@@ -2,10 +2,9 @@ import streamlit as st
 from openai import OpenAI
 
 st.set_page_config(
-    page_title="AI 책쓰기의 신",
+    page_title="AI 책쓰기 스튜디오",
     page_icon="📘",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+    layout="wide"
 )
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
@@ -15,436 +14,331 @@ if "result" not in st.session_state:
 
 st.markdown("""
 <style>
-/* ===== 기본 ===== */
+/* 전체 기본 */
 html, body, [class*="css"] {
     font-family: "Pretendard", "Noto Sans KR", sans-serif;
 }
 
-html, body, .stApp {
-    background: linear-gradient(180deg, #030713 0%, #020611 100%);
+.stApp {
+    background: linear-gradient(180deg, #050814 0%, #060b1d 100%);
 }
 
-/* ===== 기본 UI 숨기기 ===== */
-header, footer {
-    visibility: hidden !important;
-    height: 0 !important;
-}
-
-#MainMenu,
-[data-testid="stHeader"],
-[data-testid="stToolbar"],
-[data-testid="stDecoration"],
-[data-testid="stStatusWidget"] {
-    display: none !important;
-}
-
-/* ===== 상단 여백 제거 ===== */
+/* 상단 공백 제거 */
 .block-container {
-    max-width: 100vw !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    margin-top: 0 !important;
+    max-width: 1500px !important;
+    padding-top: 0rem !important;
+    padding-bottom: 2rem !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
 }
 
 section.main > div {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
+    padding-top: 0rem !important;
 }
 
-div[data-testid="stVerticalBlock"] {
-    gap: 0 !important;
-}
-
+/* 컬럼 간격 */
 div[data-testid="stHorizontalBlock"] {
-    gap: 0 !important;
+    gap: 24px !important;
 }
 
-/* ===== 메인 프레임 ===== */
-.app-frame {
-    width: 100%;
-    min-height: 100vh;
-}
-
-/* ===== 좌측 패널 ===== */
-.left-panel {
-    min-height: 100vh;
-    background: linear-gradient(180deg, rgba(46,48,61,0.98) 0%, rgba(35,37,49,0.98) 100%);
-    border-right: 1px solid rgba(255,255,255,0.06);
-    padding: 22px 28px 36px 28px;
-    box-sizing: border-box;
-}
-
-.left-top {
-    display: flex;
-    justify-content: flex-end;
-    color: rgba(255,255,255,0.88);
-    font-size: 32px;
-    line-height: 1;
-    margin-bottom: 46px;
-}
-
-.left-title {
-    color: #ffffff;
-    font-size: 27px;
-    font-weight: 800;
-    line-height: 1.42;
-    word-break: keep-all;
-    margin-bottom: 28px;
-}
-
-.left-sub {
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 16px;
-}
-
-.left-list {
-    color: #ffffff;
-    font-size: 17px;
-    line-height: 1.75;
-    font-weight: 700;
-    padding-left: 30px;
-    margin: 0;
-}
-
-.left-list li {
-    margin-bottom: 12px;
-}
-
-/* ===== 우측 패널 ===== */
-.right-panel {
-    min-height: 100vh;
-    position: relative;
-    background:
-        radial-gradient(circle at 50% 24%, rgba(42, 72, 142, 0.16) 0%, rgba(5,9,20,0) 18%),
-        linear-gradient(180deg, #020714 0%, #020611 100%);
-    overflow: hidden;
-}
-
-.right-menu {
-    position: absolute;
-    top: 16px;
-    right: 22px;
-    color: rgba(255,255,255,0.88);
-    font-size: 28px;
-    z-index: 5;
-}
-
-.hero-shell {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 40px 30px 140px 30px;
-    box-sizing: border-box;
-}
-
-.hero-inner {
-    width: 100%;
-    max-width: 980px;
-    margin: 0 auto;
-}
-
-.hero-icon-box {
-    width: 240px;
-    height: 240px;
-    margin: 0 auto 24px auto;
+/* 각 컬럼을 카드처럼 */
+div[data-testid="column"]:nth-of-type(1) {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
     border-radius: 24px;
-    background:
-        repeating-linear-gradient(
-            135deg,
-            rgba(255,255,255,0.016) 0px,
-            rgba(255,255,255,0.016) 2px,
-            transparent 2px,
-            transparent 10px
-        );
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 28px 24px 28px 24px;
+    min-height: 92vh;
 }
 
+div[data-testid="column"]:nth-of-type(2) {
+    background: radial-gradient(circle at top, rgba(22,37,92,0.30) 0%, rgba(7,11,22,0.96) 62%);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 24px;
+    padding: 36px 36px 28px 36px;
+    min-height: 92vh;
+}
+
+/* 텍스트 */
 .hero-icon {
-    font-size: 112px;
-    filter: grayscale(1) brightness(0.75);
+    text-align: center;
+    font-size: 72px;
+    margin-top: 6px;
+    margin-bottom: 8px;
 }
 
 .hero-title {
-    color: #ffffff;
-    font-size: 58px;
-    font-weight: 900;
-    line-height: 1.18;
-    letter-spacing: -0.03em;
+    text-align: center;
+    color: white;
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 10px;
+}
+
+.hero-sub {
+    text-align: center;
+    color: #c4cbe0;
+    font-size: 17px;
+    line-height: 1.7;
+    margin-bottom: 24px;
+}
+
+.hero-mini {
+    text-align: center;
+    color: #97a1b7;
+    font-size: 14px;
+    margin-bottom: 28px;
+}
+
+.left-title {
+    color: white;
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.25;
     margin-bottom: 14px;
-    word-break: keep-all;
 }
 
-.hero-author {
-    color: #c4ccdc;
+.left-body {
+    color: #dce3f3;
     font-size: 16px;
+    line-height: 1.9;
+    margin-bottom: 18px;
 }
 
-.hero-author strong {
-    color: #ffffff;
-    font-weight: 700;
+.left-muted {
+    color: #aeb8cf;
+    font-size: 15px;
+    line-height: 1.9;
 }
 
-/* ===== 입력창 ===== */
-.input-fixed {
-    position: fixed;
-    left: calc(29% + ((71%) / 2));
-    transform: translateX(-50%);
-    bottom: 28px;
-    width: min(820px, calc(100vw - 470px));
-    z-index: 50;
+.badge {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 6px 6px 0 0;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 13px;
 }
 
-.input-shell {
-    position: relative;
-    width: 100%;
-}
-
-div[data-testid="stTextInput"] {
-    margin: 0 !important;
-}
-
+/* 입력창 */
 div[data-testid="stTextInput"] input {
-    height: 64px !important;
-    min-height: 64px !important;
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
     border-radius: 14px !important;
-    border: 1px solid rgba(255,255,255,0.06) !important;
-    background: rgba(49, 53, 69, 0.84) !important;
-    color: #ffffff !important;
-    font-size: 18px !important;
-    padding-left: 18px !important;
-    padding-right: 74px !important;
-    box-shadow: none !important;
+    color: white !important;
+    min-height: 54px !important;
 }
 
-div[data-testid="stTextInput"] input::placeholder {
-    color: #8d93a6 !important;
-    opacity: 1 !important;
-}
-
-.send-btn-wrap {
-    position: absolute;
-    right: 10px;
-    top: 12px;
-    z-index: 60;
+div[data-testid="stSelectbox"] > div {
+    background: rgba(255,255,255,0.06) !important;
+    border-radius: 14px !important;
 }
 
 .stButton > button {
-    width: 46px !important;
-    min-width: 46px !important;
-    height: 40px !important;
-    min-height: 40px !important;
-    border-radius: 10px !important;
-    border: none !important;
-    background: rgba(255,255,255,0.09) !important;
-    color: #d6dae5 !important;
-    font-size: 20px !important;
-    font-weight: 800 !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-}
-
-.stButton > button:hover {
-    background: rgba(255,255,255,0.14) !important;
-    color: #ffffff !important;
-}
-
-/* ===== 결과창 ===== */
-.result-shell {
-    position: fixed;
-    left: 31%;
-    right: 28px;
-    bottom: 108px;
-    max-height: 42vh;
-    overflow: auto;
-    background: rgba(11, 16, 29, 0.94);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 20px;
-    padding: 22px 24px;
-    box-sizing: border-box;
-    backdrop-filter: blur(10px);
-    z-index: 40;
-}
-
-.result-title {
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: 800;
-    margin-bottom: 12px;
-}
-
-.result-box {
-    color: #d9dfed;
-    font-size: 15px;
-    line-height: 1.85;
-    white-space: pre-wrap;
-    word-break: keep-all;
-}
-
-.download-inline {
-    margin-top: 16px;
-}
-
-div[data-testid="stDownloadButton"] > button {
     width: 100% !important;
-    height: 48px !important;
-    min-height: 48px !important;
-    border-radius: 12px !important;
+    min-height: 54px !important;
+    border-radius: 14px !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
-    background: rgba(255,255,255,0.05) !important;
-    color: #ffffff !important;
+    background: linear-gradient(180deg, #131c34 0%, #0b1020 100%) !important;
+    color: white !important;
+    font-size: 16px !important;
     font-weight: 700 !important;
 }
 
-/* ===== 모바일 ===== */
-@media (max-width: 1100px) {
-    .left-panel {
-        display: none;
-    }
+div[data-testid="stTextArea"] textarea {
+    background: rgba(255,255,255,0.05) !important;
+    color: white !important;
+    border-radius: 16px !important;
+    line-height: 1.8 !important;
+}
 
-    .hero-shell {
-        padding: 40px 20px 130px 20px;
-    }
+.stDownloadButton > button {
+    width: 100% !important;
+    min-height: 52px !important;
+    border-radius: 14px !important;
+    font-weight: 700 !important;
+}
 
-    .hero-title {
-        font-size: 40px;
-    }
-
-    .hero-icon-box {
-        width: 190px;
-        height: 190px;
-    }
-
-    .hero-icon {
-        font-size: 92px;
-    }
-
-    .input-fixed {
-        left: 50%;
-        width: calc(100vw - 40px);
-    }
-
-    .result-shell {
-        left: 20px;
-        right: 20px;
-        bottom: 100px;
-    }
+/* 라벨 */
+label, .stSelectbox label, .stTextInput label {
+    color: #dce4f6 !important;
+    font-weight: 700 !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="app-frame">', unsafe_allow_html=True)
-
-left, right = st.columns([1.08, 2.42], gap="small")
+left, right = st.columns([1, 2.2])
 
 with left:
+    st.markdown('<div class="left-title">하루에 한 권 초안 만들기</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="left-body">이 공간은 단순한 글 생성기가 아니라<br>전자책 초안을 빠르게 만드는 책쓰기 툴입니다.</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown('<div class="left-title" style="font-size:28px; margin-top:28px;">사용 예시</div>', unsafe_allow_html=True)
     st.markdown("""
-    <div class="left-panel">
-        <div class="left-top">×</div>
-        <div class="left-title">
-            하루에 책 한권을 쓰는 챗쓰기의 신 등장, 그 이름은 바로 AI 책쓰기의 신!
-        </div>
-        <div class="left-sub">• 사용 예시 :</div>
-        <ol class="left-list">
-            <li>"효율적으로 글을 쓰는 방법은?"</li>
-            <li>"책으로 독자들에게 감동을 주는 방법은?"</li>
-            <li>"어떻게 하루 1권 책을 쓰는지?"</li>
-        </ol>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="left-body">
+1. "효율적으로 글을 쓰는 방법 전자책 써줘"<br><br>
+2. "초보도 가능한 온라인 부업 전자책 써줘"<br><br>
+3. "AI 자동화로 수익 만드는 방법 전자책 써줘"<br><br>
+4. "인스타 수익화 입문 가이드 전자책 써줘"<br><br>
+5. "퇴사 후 1인 온라인 수익 만들기 전자책 써줘"
+</div>
+""", unsafe_allow_html=True)
+
+    st.markdown("""
+<div class="left-muted">
+주제는 조금 구체적으로 적을수록 결과가 더 좋아집니다.<br>
+예: "초보 주부도 가능한 블로그 수익화 입문서"
+</div>
+""", unsafe_allow_html=True)
+
+    st.markdown("""
+<div style="margin-top:22px;">
+<span class="badge">전자책 초안</span>
+<span class="badge">긴 원고 생성</span>
+<span class="badge">초보자용</span>
+<span class="badge">다운로드 가능</span>
+<span class="badge">다크 UI</span>
+</div>
+""", unsafe_allow_html=True)
 
 with right:
-    st.markdown("""
-    <div class="right-panel">
-        <div class="right-menu">⋮</div>
-        <div class="hero-shell">
-            <div class="hero-inner">
-                <div class="hero-icon-box">
-                    <div class="hero-icon">🧙</div>
-                </div>
-                <div class="hero-title">1주일에 한 권, 슈퍼AI급 책쓰기법</div>
-                <div class="hero-author">By <strong>AI 최대표</strong></div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="hero-icon">🧠</div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero-title">AI 책쓰기 스튜디오</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="hero-sub">짧은 답변이 아니라, 제목 · 프롤로그 · 목차 · 5개 장 · FAQ · 체크리스트까지 포함된<br>전자책 초안을 길고 풍부하게 생성합니다.</div>',
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        '<div class="hero-mini">복붙해서 전자책 초안으로 바로 쓸 수 있는 형태로 설계된 버전입니다.</div>',
+        unsafe_allow_html=True
+    )
 
-st.markdown('</div>', unsafe_allow_html=True)
+    topic = st.text_input(
+        "주제 입력",
+        placeholder="예: 초보도 가능한 온라인 부업 / AI 자동화 수익 / 인스타 수익화 입문"
+    )
 
-st.markdown('<div class="input-fixed"><div class="input-shell">', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        tone = st.selectbox("말투", ["친근한 말투", "전문가형", "마케팅형"])
+    with col2:
+        reader = st.selectbox("대상", ["초보자", "직장인", "부업 입문자", "1인사업 준비자"])
 
-topic = st.text_input(
-    "메시지 입력",
-    placeholder="Your message",
-    label_visibility="collapsed"
-)
+    col3, col4 = st.columns(2)
+    with col3:
+        length = st.selectbox("분량", ["길게", "아주 길게"])
+    with col4:
+        structure = st.selectbox("스타일", ["실전형", "가이드형", "설득형"])
 
-st.markdown('<div class="send-btn-wrap">', unsafe_allow_html=True)
-generate = st.button("➤")
-st.markdown('</div></div></div>', unsafe_allow_html=True)
+    if st.button("전자책 생성"):
+        if topic.strip() == "":
+            st.warning("주제를 입력해주세요.")
+        else:
+            prompt = f"""
+너는 전자책 전문 작가이자 콘텐츠 기획자다.
 
-if generate:
-    if not topic.strip():
-        st.warning("주제를 입력해줘.")
-    else:
-        prompt = f"""
-너는 전자책 전문 작가이자 책쓰기 코치다.
+주제: {topic}
+말투: {tone}
+대상 독자: {reader}
+구성 스타일: {structure}
+분량 수준: {length}
 
-사용자 주제:
-{topic}
+아래 조건에 맞춰 한국어 전자책 초안을 작성해라.
 
-다음 조건으로 한국어 전자책 초안을 작성해라.
+[중요]
+- 절대 짧게 쓰지 마라.
+- 결과는 실제 전자책 초안처럼 길고 자세해야 한다.
+- 최소 5개 장으로 구성해라.
+- 각 장마다 최소 3개의 소제목을 넣어라.
+- 각 소제목마다 최소 2~4문단 설명을 써라.
+- 초보자가 읽어도 이해되게 쉽게 설명해라.
+- 실전형 내용과 예시를 자주 넣어라.
+- 전자책 원고처럼 복붙해서 바로 쓸 수 있게 써라.
 
-조건:
-- 제목 3개 제안
-- 최종 제목 1개 선정
-- 한 줄 소개
-- 프롤로그
-- 목차
-- 1장~5장
-- 각 장마다 소제목 3개 이상
-- 각 소제목은 초보자도 이해하기 쉽게 자세히 설명
-- 예시, 실전 팁, 적용 포인트 포함
-- FAQ 5개
-- 실행 체크리스트 10개
-- 전체적으로 실제 전자책 원고처럼 길고 풍부하게 작성
+[출력 형식]
+# 전자책 제목
+# 한 줄 소개
+# 프롤로그
+# 목차
+
+# 1장
+## 소제목
+내용
+
+## 소제목
+내용
+
+## 소제목
+내용
+
+# 2장
+## 소제목
+내용
+
+## 소제목
+내용
+
+## 소제목
+내용
+
+# 3장
+## 소제목
+내용
+
+## 소제목
+내용
+
+## 소제목
+내용
+
+# 4장
+## 소제목
+내용
+
+## 소제목
+내용
+
+## 소제목
+내용
+
+# 5장
+## 소제목
+내용
+
+## 소제목
+내용
+
+## 소제목
+내용
+
+# 마무리
+# 자주 묻는 질문 5개
+# 바로 실행 체크리스트 10개
 """
-        try:
-            with st.spinner("전자책 초안 작성 중..."):
-                response = client.responses.create(
-                    model="gpt-4o-mini",
-                    input=prompt
-                )
-                st.session_state.result = response.output_text
-        except Exception as e:
-            st.session_state.result = f"오류가 발생했어.\n\n{str(e)}"
+            try:
+                with st.spinner("AI가 전자책을 작성 중입니다..."):
+                    response = client.responses.create(
+                        model="gpt-4o-mini",
+                        input=prompt
+                    )
+                    st.session_state.result = response.output_text
 
-if st.session_state.result:
-    safe_result = (
-        st.session_state.result
-        .replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-    )
+                st.success("전자책 초안이 완성되었습니다.")
+            except Exception as e:
+                st.error("생성 중 오류가 발생했습니다.")
+                st.error(str(e))
 
-    st.markdown(f"""
-    <div class="result-shell">
-        <div class="result-title">생성된 초안</div>
-        <div class="result-box">{safe_result}</div>
-        <div class="download-inline"></div>
-    </div>
-    """, unsafe_allow_html=True)
+    if st.session_state.result:
+        st.text_area("전자책 원고", st.session_state.result, height=720)
 
-    st.download_button(
-        "전자책 초안 다운로드",
-        st.session_state.result,
-        file_name="ebook_draft.txt",
-        mime="text/plain"
-    )
+        st.download_button(
+            "텍스트 다운로드",
+            st.session_state.result,
+            file_name="ebook.txt",
+            mime="text/plain"
+        )
