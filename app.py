@@ -12,12 +12,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# OpenAI 연결
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
-# 무료 사용 횟수 제한
-if "count" not in st.session_state:
-    st.session_state.count = 0
 
 st.title("📘 AI 전자책 생성기")
 st.write("주제를 입력하면 AI가 전자책 초안을 만들고, TXT/PDF로 다운로드할 수 있어요.")
@@ -93,17 +88,12 @@ def make_pdf(text: str) -> str:
     return temp_file.name
 
 
-if st.session_state.count >= 3:
-    st.error("무료 사용 횟수를 초과했습니다. 현재는 3회까지만 테스트 가능합니다.")
-else:
-    if st.button("전자책 생성"):
-        if topic.strip() == "":
-            st.warning("주제를 입력하세요.")
-        else:
-            st.session_state.count += 1
-
-            with st.spinner("AI가 전자책을 작성 중입니다..."):
-                prompt = f"""
+if st.button("전자책 생성"):
+    if topic.strip() == "":
+        st.warning("주제를 입력하세요.")
+    else:
+        with st.spinner("AI가 전자책을 작성 중입니다..."):
+            prompt = f"""
 너는 전자책 전문 작가다.
 
 주제: {topic}
@@ -136,36 +126,35 @@ else:
 - 너무 길지 않게 적당한 분량으로 작성
 """
 
-                try:
-                    response = client.responses.create(
-                        model="gpt-4o-mini",
-                        input=prompt
-                    )
+            try:
+                response = client.responses.create(
+                    model="gpt-4o-mini",
+                    input=prompt
+                )
 
-                    result = response.output_text
+                result = response.output_text
 
-                    st.success("전자책 초안이 완성되었습니다!")
-                    st.info(f"남은 무료 사용 횟수: {3 - st.session_state.count}회")
+                st.success("전자책 초안이 완성되었습니다!")
 
-                    st.text_area("전자책 결과", result, height=500)
+                st.text_area("전자책 결과", result, height=500)
 
+                st.download_button(
+                    "텍스트 다운로드",
+                    result,
+                    file_name="ebook.txt",
+                    mime="text/plain"
+                )
+
+                pdf_path = make_pdf(result)
+                with open(pdf_path, "rb") as f:
                     st.download_button(
-                        "텍스트 다운로드",
-                        result,
-                        file_name="ebook.txt",
-                        mime="text/plain"
+                        "📘 PDF 다운로드",
+                        f,
+                        file_name="ebook.pdf",
+                        mime="application/pdf"
                     )
 
-                    pdf_path = make_pdf(result)
-                    with open(pdf_path, "rb") as f:
-                        st.download_button(
-                            "📘 PDF 다운로드",
-                            f,
-                            file_name="ebook.pdf",
-                            mime="application/pdf"
-                        )
-
-                except Exception as e:
-                    st.error("생성 중 오류가 발생했습니다.")
-                    st.error(str(e))
-                    st.info("OpenAI 결제/한도 문제이거나 모델 사용 제한일 수 있어요. 잠시 후 다시 시도해보세요.")
+            except Exception as e:
+                st.error("생성 중 오류가 발생했습니다.")
+                st.error(str(e))
+                st.info("OpenAI 결제/한도 문제이거나 모델 사용 제한일 수 있어요. 잠시 후 다시 시도해보세요.")
